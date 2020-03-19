@@ -63,4 +63,5 @@ if __name__ == '__main__':
                 x_list.append(x[1,:,:,:])
                 break
     
+    os.makedirs('../logs', exist_ok=True)
     torchvision.utils.save_image(x_list, '../logs/fourer_heatmap_test.png', nrow=32)
