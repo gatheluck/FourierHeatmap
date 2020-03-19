@@ -101,15 +101,15 @@ class DatasetBuilder(object):
         # to tensor
         transform.extend([torchvision.transforms.ToTensor(),])
 
+        # optional (Fourier Noise, Patch Shuffle, etc.)
+        if optional_transform:
+            transform.extend(optional_transform)
+
         # normalize
         if normalize:
             transform.extend([
                 torchvision.transforms.Normalize(mean=self.DATASET_CONFIG[name].mean, std=self.DATASET_CONFIG[name].std),
             ])
-
-        # optional
-        if optional_transform:
-            transform.extend(optional_transform)
 
         return torchvision.transforms.Compose(transform)
     
