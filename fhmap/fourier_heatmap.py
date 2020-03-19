@@ -51,7 +51,7 @@ if __name__ == '__main__':
     transform = torchvision.transforms.Compose([
                     torchvision.transforms.ToTensor(),
                 ])
-    dataset = torchvision.datasets.CIFAR10(root='../data', train=False, transform=transform, download=True)
+    dataset = torchvision.datasets.CIFAR10(root='../data/cifar10', train=False, transform=transform, download=True)
     loader  = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=8, pin_memory=True)
 
     x_list = []
