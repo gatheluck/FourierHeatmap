@@ -38,7 +38,7 @@ def generate_fourier_base(h:int, w:int, h_index:int, w_index:int):
     spectrum_matrix = spectrum_matrix.numpy()
     spectrum_matrix = np.fft.ifftshift(spectrum_matrix) # swap qadrant (low-freq centered to high-freq centered)
 
-    fourier_base = torch.from_numpy(np.fft.ifft2(spectrum_matrix).real)
+    fourier_base = torch.from_numpy(np.fft.ifft2(spectrum_matrix).real).float()
     fourier_base /= fourier_base.norm()
 
     return fourier_base
