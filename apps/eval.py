@@ -36,7 +36,7 @@ from fhmap.fourier_heatmap import AddFourierNoise
 # fourier heatmap
 @click.option('--h_map_size', type=int, default=32)
 @click.option('--w_map_size', type=int, default=32)
-@click.option('--eps', type=float, default=32)
+@click.option('--eps', type=float, default=16)
 @click.option('-k', '--top_k', type=int, default=1)
 # log
 @click.option('-l', '--log_dir', type=str, required=True)
