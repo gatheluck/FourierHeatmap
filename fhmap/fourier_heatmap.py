@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torchvision
 
-from fourier_base import generate_fourier_base
+from fhmap.fourier_base import generate_fourier_base
 
 class AddFourierNoise(object):
     def __init__(self, h_index:int, w_index:int, eps:float):
