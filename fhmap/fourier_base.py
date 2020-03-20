@@ -64,7 +64,4 @@ if __name__ == "__main__":
         torchvision.utils.save_image(x_list, file_path, nrow=w)
     
     os.makedirs('../logs', exist_ok=True)
-    generate_fourier_basis(32,32,'../logs/test_noise_32x32.png')
-    generate_fourier_basis(33,33,'../logs/test_noise_33x33.png')
-    generate_fourier_basis(32,33,'../logs/test_noise_32x33.png')
-    generate_fourier_basis(33,32,'../logs/test_noise_33x32.png')
+    generate_fourier_basis(32,32,'../logs/fourier_base_32x32.png')
