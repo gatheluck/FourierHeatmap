@@ -30,18 +30,19 @@ class AddFourierNoise(object):
         assert h>=1 or w>=1
         assert abs(self.h_index) <= np.floor(h/2) and abs(self.w_index) <= np.floor(w/2)
 
-        fourier_base = generate_fourier_base(h, w, self.h_index, self.w_index) # normalized fourier base
-        
+        fourier_base  = generate_fourier_base(h, w, self.h_index, self.w_index) # normalized fourier base
+        fourier_base /= fourier_base.norm()
+
+        eps_l2 = np.sqrt(((self.eps/255.0)**2.0)*h*w)
+        fourier_base *= eps_l2
+
         fourier_noise  = fourier_base.unsqueeze(0).repeat(c,1,1)
+        #fourier_noise /= fourier_noise.norm()
 
-        eps_l2 = np.sqrt(((self.eps/255.0)**2.0)*h*w*3.0)
-        fourier_noise /= fourier_noise.norm()
+        fourier_noise[0,:,:] *= random.randrange(-1,2,2)
+        fourier_noise[1,:,:] *= random.randrange(-1,2,2)
+        fourier_noise[2,:,:] *= random.randrange(-1,2,2)
 
-        fourier_noise[0,:,:] *= random.uniform(-1.0,1.0)
-        fourier_noise[1,:,:] *= random.uniform(-1.0,1.0)
-        fourier_noise[2,:,:] *= random.uniform(-1.0,1.0)
-
-        fourier_noise *= eps_l2
 
         return torch.clamp(x+fourier_noise, min=0.0, max=1.0)
 
