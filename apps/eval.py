@@ -7,6 +7,7 @@ sys.path.append(base)
 import click
 import tqdm
 import random
+import collections
 
 import numpy as np
 import torch
@@ -34,8 +35,8 @@ from fhmap.fourier_heatmap import AddFourierNoise
 @click.option('-N', '--batch_size', type=int, default=1024)
 @click.option('--num_samples', type=int, default=1024)
 # fourier heatmap
-@click.option('--h_map_size', type=int, default=32)
-@click.option('--w_map_size', type=int, default=32)
+@click.option('--h_map_size', type=int, default=33)
+@click.option('--w_map_size', type=int, default=33)
 @click.option('--eps', type=float, default=16)
 @click.option('-k', '--top_k', type=int, default=1)
 # log
@@ -51,6 +52,9 @@ def eval(**kwargs):
     FLAGS.initialize(**kwargs)
     FLAGS.summary()
 
+    assert FLAGS.h_map_size%2==1, 'h_map_size should be odd because of symmetry'
+    assert FLAGS.w_map_size%2==1, 'w_map_size should be odd because of symmetry'
+
     # dataset
     dataset_builder = DatasetBuilder(name=FLAGS.dataset, root_path=FLAGS.dataroot)
 
@@ -62,11 +66,16 @@ def eval(**kwargs):
 
     # Fourier Heatmap
     error_matrix = torch.zeros(FLAGS.h_map_size, FLAGS.w_map_size).float() 
-    images_list  = []
+    images_list_former_half  = collections.deque()
+    images_list_latter_half  = collections.deque()
 
-    for h_index in tqdm.tqdm(range(-int(np.floor(FLAGS.h_map_size/2)), FLAGS.h_map_size-int(np.floor(FLAGS.h_map_size/2)))):
-        for w_index in range(-int(np.floor(FLAGS.w_map_size/2)), FLAGS.w_map_size-int(np.floor(FLAGS.w_map_size/2))):
-
+    # for h_index in tqdm.tqdm(range(-int(np.floor(FLAGS.h_map_size/2)), FLAGS.h_map_size-int(np.floor(FLAGS.h_map_size/2)))):
+    #     for w_index in range(-int(np.floor(FLAGS.w_map_size/2)), FLAGS.w_map_size-int(np.floor(FLAGS.w_map_size/2))):
+    
+    max_n_h = int(np.floor(FLAGS.h_map_size/2.0)) 
+    max_n_w = int(np.floor(FLAGS.w_map_size/2.0))
+    for h_index in tqdm.tqdm(range(-max_n_h, 1)): # do not need to run until max_n_h+1 because of symetry.
+        for w_index in       range(-max_n_w, max_n_w+1):
             # generate dataset with Fourier basis noise
             fourier_noise = AddFourierNoise(h_index, w_index, FLAGS.eps)
             dataset = dataset_builder(train=False, normalize=True, optional_transform=[fourier_noise])
@@ -88,10 +97,18 @@ def eval(**kwargs):
                     num_correct += get_num_correct(logit, t, topk=FLAGS.top_k)
 
                     if i==0:
-                        images_list.append(x[10])
+                        images_list_former_half.append(x[10])
+                        if h_index!=0: images_list_latter_half.appendleft(x[10])
                 
                 acc = num_correct / float(len(dataset))
-                error_matrix[h_index+int(np.floor(FLAGS.h_map_size/2)), w_index+int(np.floor(FLAGS.w_map_size/2))] = 1.0 - acc
+
+                h_matrix_index = int(np.floor(FLAGS.h_map_size/2)) + h_index
+                w_matrix_index = int(np.floor(FLAGS.w_map_size/2)) + w_index
+                error_matrix[h_matrix_index, w_matrix_index] = 1.0 - acc
+                
+                if h_index!=0:
+                    error_matrix[FLAGS.h_map_size - h_matrix_index-1, 
+                                 FLAGS.w_map_size - w_matrix_index-1] = 1.0 - acc
 
             #print('({h_index},{w_index}) error: {error}'.format(h_index=h_index, w_index=w_index, error=1.0-acc))
         print(error_matrix)
@@ -99,6 +116,8 @@ def eval(**kwargs):
     # logging
     os.makedirs(FLAGS.log_dir, exist_ok=True)
     torch.save(error_matrix, os.path.join(FLAGS.log_dir, 'fhmap_data'+FLAGS.suffix+'.pth'))
+    images_list_former_half.extend(images_list_latter_half)
+    images_list = list(images_list_former_half)
     torchvision.utils.save_image(torch.stack(images_list, dim=0), os.path.join(FLAGS.log_dir, 'example_images'+FLAGS.suffix+'.png'), nrow=FLAGS.w_map_size)
     sns.heatmap(error_matrix.numpy(), vmin=0.0, vmax=1.0, cmap="jet", cbar=True, xticklabels=False, yticklabels=False)
     plt.savefig(os.path.join(FLAGS.log_dir, 'fhmap'+FLAGS.suffix+'.png'))
