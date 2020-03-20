@@ -6,6 +6,7 @@ sys.path.append(base)
 
 import click
 import tqdm
+import random
 
 import numpy as np
 import torch
@@ -33,7 +34,7 @@ from fhmap.fourier_heatmap import AddFourierNoise
 # fourier heatmap
 @click.option('--h_map_size', type=int, default=32)
 @click.option('--w_map_size', type=int, default=32)
-@click.option('--eps', type=float, default=16)
+@click.option('--eps', type=float, default=32)
 @click.option('-k', '--top_k', type=int, default=1)
 # log
 @click.option('-l', '--log_dir', type=str, required=True)
@@ -58,18 +59,18 @@ def eval(**kwargs):
     if torch.cuda.device_count() > 1: model = torch.nn.DataParallel(model)
 
     # Fourier Heatmap
-    error_matrix = torch.zeros(FLAGS.h_map_size, FLAGS.w_map_size) 
+    error_matrix = torch.zeros(FLAGS.h_map_size, FLAGS.w_map_size).float() 
+    images_list  = []
 
-    for h_index in tqdm.tqdm(range(-int(np.floor(FLAGS.h_map_size/2)), h_map_size-int(np.floor(h_map_size/2)))):
-        for w_index in range(-int(np.floor(FLAGS.w_map_size/2)), w_map_size-int(np.floor(w_map_size/2))):
+    for h_index in tqdm.tqdm(range(-int(np.floor(FLAGS.h_map_size/2)), FLAGS.h_map_size-int(np.floor(FLAGS.h_map_size/2)))):
+        for w_index in range(-int(np.floor(FLAGS.w_map_size/2)), FLAGS.w_map_size-int(np.floor(FLAGS.w_map_size/2))):
 
             # generate dataset with Fourier basis noise
             fourier_noise = AddFourierNoise(h_index, w_index, FLAGS.eps)
             dataset = dataset_builder(train=False, normalize=True, optional_transform=[fourier_noise])
             if FLAGS.num_samples != -1:
                 num_samples = min(FLAGS.num_samples, len(dataset))
-                indices = range(len(dataset))
-                indices = random.sample(indices, num_samples)
+                indices = [i for i in range(num_samples)]
                 dataset = torch.utils.data.Subset(dataset, indices)
             loader = torch.utils.data.DataLoader(dataset, batch_size=FLAGS.batch_size, shuffle=False, num_workers=FLAGS.num_workers, pin_memory=True)
 
@@ -83,13 +84,21 @@ def eval(**kwargs):
                     model.zero_grad()
                     logit = model(x)
                     num_correct += get_num_correct(logit, t, topk=FLAGS.top_k)
+
+                    if i==0:
+                        images_list.append(x[10])
                 
                 acc = num_correct / float(len(dataset))
-                error_matrix[h_index, w_index] = 1.0 - acc
+                error_matrix[h_index+int(np.floor(FLAGS.h_map_size/2)), w_index+int(np.floor(FLAGS.w_map_size/2))] = 1.0 - acc
 
-            print('({h_index},{w_index}) error: {error}'.format(h_index, w_index, 1.0-acc))
+            #print('({h_index},{w_index}) error: {error}'.format(h_index=h_index, w_index=w_index, error=1.0-acc))
 
     # logging
     os.makedirs(FLAGS.log_dir, exist_ok=True)
     torch.save(error_matrix, os.path.join(FLAGS.log_dir, 'fhmap_data'+FLAGS.suffix+'.pth'))
-    torchvision.utils.save_image(error_matrix.unsqueeze(0), os.path.join(FLAGS.log_dir, 'fhmap'+FLAGS.suffix+'.png'))
+    torchvision.utils.save_image(error_matrix.unsqueeze(0),       os.path.join(FLAGS.log_dir, 'fhmap'+FLAGS.suffix+'.png'))
+    torchvision.utils.save_image(torch.stack(images_list, dim=0), os.path.join(FLAGS.log_dir, 'ex'+FLAGS.suffix+'.png'), nrow=FLAGS.w_map_size)
+    print(error_matrix)
+
+if __name__ == '__main__':
+    main()
