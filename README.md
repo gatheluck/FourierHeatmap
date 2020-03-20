@@ -33,7 +33,7 @@ python fourier_base.py
 
 will generate 32x32 types 2D Fourier basis and save as an image under `logs/fourier_base_32x32.png`. The generated image should be like follows. 
 
-<img src="samples/fourier_base_32x32.png" width="400px">
+<img src="samples/fourier_base_32x32.png" width="350px">
 
 ### Evaluating Fourier Heat Map
 
