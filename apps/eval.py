@@ -51,6 +51,8 @@ def eval(**kwargs):
     FLAGS = FlagHolder()
     FLAGS.initialize(**kwargs)
     FLAGS.summary()
+    os.makedirs(FLAGS.log_dir, exist_ok=True)
+    FLAGS.dump(path=os.path.join(FLAGS.log_dir, 'flags{}.json'.format(FLAGS.suffix)))
 
     assert FLAGS.h_map_size%2==1, 'h_map_size should be odd because of symmetry'
     assert FLAGS.w_map_size%2==1, 'w_map_size should be odd because of symmetry'
@@ -69,9 +71,6 @@ def eval(**kwargs):
     images_list_former_half  = collections.deque()
     images_list_latter_half  = collections.deque()
 
-    # for h_index in tqdm.tqdm(range(-int(np.floor(FLAGS.h_map_size/2)), FLAGS.h_map_size-int(np.floor(FLAGS.h_map_size/2)))):
-    #     for w_index in range(-int(np.floor(FLAGS.w_map_size/2)), FLAGS.w_map_size-int(np.floor(FLAGS.w_map_size/2))):
-    
     max_n_h = int(np.floor(FLAGS.h_map_size/2.0)) 
     max_n_w = int(np.floor(FLAGS.w_map_size/2.0))
     for h_index in tqdm.tqdm(range(-max_n_h, 1)): # do not need to run until max_n_h+1 because of symetry.
@@ -114,7 +113,6 @@ def eval(**kwargs):
         print(error_matrix)
 
     # logging
-    os.makedirs(FLAGS.log_dir, exist_ok=True)
     torch.save(error_matrix, os.path.join(FLAGS.log_dir, 'fhmap_data'+FLAGS.suffix+'.pth'))
     images_list_former_half.extend(images_list_latter_half)
     images_list = list(images_list_former_half)
