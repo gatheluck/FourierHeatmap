@@ -33,6 +33,8 @@ python fourier_base.py
 
 will generate 32x32 types 2D Fourier basis and save as an image under `logs/fourier_base_32x32.png`. The generated image should be like follows. 
 
+<img src="samples/fourier_base_32x32.png" width="400px">
+
 ### Evaluating Fourier Heat Map
 
 The script `apps/eval.py`
@@ -46,8 +48,6 @@ python eval.py -a resnet56 -w [WEIGHT_PATH]  -d cifar10 --h_map_size 31 --w_map_
 will generate 31x31 Fourier Heat Map for ResNet56 on Cifar-10 dataset and save as an image under `LOG_DIR/fhmap.png`. The generated image should be like follows. 
 
 <img src="samples/cifar10_resnet56_natural.png" width="400px">
-
-
 
 Note that currectly both `h_map_size` and `w_map_size`  should be odd number because of the symetry of Fourier basis.
 
