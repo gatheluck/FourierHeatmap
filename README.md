@@ -45,7 +45,7 @@ python eval.py -a resnet56 -w [WEIGHT_PATH]  -d cifar10 --h_map_size 31 --w_map_
 
 will generate 31x31 Fourier Heat Map for ResNet56 on Cifar-10 dataset and save as an image under `LOG_DIR/fhmap.png`. The generated image should be like follows. 
 
-<img src="samples/cifar10_resnet56_natural.png" width="300px">
+<img src="samples/cifar10_resnet56_natural.png" width="400px">
 
 
 
