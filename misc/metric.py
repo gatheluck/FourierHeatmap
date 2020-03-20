@@ -12,6 +12,6 @@ def get_num_correct(output, target, topk=1):
         _, pred = output.topk(topk, dim=1) # top-k index: size (B, k)
         pred = pred.t() # size (k, B)
         correct = pred.eq(target.view(1, -1).expand_as(pred))
-        num_correct = correct[:k].float().sum().item()
+        num_correct = correct[:topk].float().sum().item()
     
         return num_correct
