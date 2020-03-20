@@ -11,6 +11,8 @@ import random
 import numpy as np
 import torch
 import torchvision
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from misc.flag_holder import FlagHolder
 from misc.io import load_model
@@ -92,13 +94,15 @@ def eval(**kwargs):
                 error_matrix[h_index+int(np.floor(FLAGS.h_map_size/2)), w_index+int(np.floor(FLAGS.w_map_size/2))] = 1.0 - acc
 
             #print('({h_index},{w_index}) error: {error}'.format(h_index=h_index, w_index=w_index, error=1.0-acc))
+        print(error_matrix)
 
     # logging
     os.makedirs(FLAGS.log_dir, exist_ok=True)
     torch.save(error_matrix, os.path.join(FLAGS.log_dir, 'fhmap_data'+FLAGS.suffix+'.pth'))
-    torchvision.utils.save_image(error_matrix.unsqueeze(0),       os.path.join(FLAGS.log_dir, 'fhmap'+FLAGS.suffix+'.png'))
-    torchvision.utils.save_image(torch.stack(images_list, dim=0), os.path.join(FLAGS.log_dir, 'ex'+FLAGS.suffix+'.png'), nrow=FLAGS.w_map_size)
-    print(error_matrix)
+    torchvision.utils.save_image(torch.stack(images_list, dim=0), os.path.join(FLAGS.log_dir, 'example_images'+FLAGS.suffix+'.png'), nrow=FLAGS.w_map_size)
+    sns.heatmap(error_matrix.numpy(), vmin=0.0, vmax=1.0, cmap="jet", cbar=True, xticklabels=False, yticklabels=False)
+    plt.savefig(os.path.join(FLAGS.log_dir, 'fhmap'+FLAGS.suffix+'.png'))
+    
 
 if __name__ == '__main__':
     main()
