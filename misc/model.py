@@ -9,8 +9,8 @@ from collections import namedtuple
 import torch
 import torchvision
 
-from models.alexnet import alexnet_v2
-from models.wideresnet import wideresnet16, wideresnet28, wideresnet40
+from misc.models.alexnet import alexnet_v2
+from misc.models.wideresnet import wideresnet16, wideresnet28, wideresnet40
 
 
 class ModelBuilder(object):
