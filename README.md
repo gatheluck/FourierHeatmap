@@ -51,6 +51,18 @@ will generate 31x31 Fourier Heat Map for ResNet56 on Cifar-10 dataset and save a
 
 Note that currectly both `h_map_size` and `w_map_size`  should be odd number because of the symetry of Fourier basis.
 
+### Evaluating your model
+
+Currently supported architectures are as follows;
+
+- Alexnet
+- VGG: 16, 16 with BN, 19, 19 with BN
+- ResNet: 18, 34, 50, 56, 101, 152
+- WideResNet: 16, 28, 40
+
+If you want evaluate Fourier Heat Map of your model, you can use 
+`AddFourierNoise`  class in `fhmap/fourier_heatmap.py`  like classes in `torchvision.transforms`. 
+
 ## References
 
 - [Dong Yin, Raphael Gontijo Lopes, Jonathon Shlens, Ekin D. Cubuk, Justin Gilmer. "A Fourier Perspective on Model Robustness in Computer Vision.", in NeurIPS, 2019.](https://arxiv.org/abs/1906.08988)
