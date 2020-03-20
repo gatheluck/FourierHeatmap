@@ -11,13 +11,13 @@ import torchvision
 
 from misc.models.alexnet import alexnet_v2
 from misc.models.wideresnet import wideresnet16, wideresnet28, wideresnet40
-
+from misc.models.cifar10_resnet import resnet56
 
 class ModelBuilder(object):
     MODEL_CONFIG = {
         'alexnet':      [''],
         'vgg':          '16 16_bn 19 19_bn'.split(),
-        'resnet':       '18 34 50 101 152'.split(),
+        'resnet':       '18 34 50 56 101 152'.split(),
         'wideresnet':   '16 28 40'.split(),
     }
 
@@ -57,6 +57,10 @@ class ModelBuilder(object):
             elif name.startswith('wideresnet'):
                 func = eval('{name}'.format(name=name))
                 model = func(num_classes=num_classes)
+            elif name in ['resnet56']:
+                assert num_classes==10, "this resnet is for CIFAR"
+                func = eval('{name}'.format(name=name))
+                model = func()
             # call torchvision function
             else:
                 func = eval('torchvision.models.{name}'.format(name=name))
