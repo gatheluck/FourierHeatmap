@@ -62,7 +62,7 @@ class AddFourierNoise(object):
         return torch.clamp(x + fourier_noise, min=0.0, max=1.0)
 
 
-def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: int, eps: float, num_samples: int, batch_size: int, num_workers: int, log_dir: str, top_k: int = 1, suffix: str = '', orator: bool = False, **kwargs):
+def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: int, eps: float, num_samples: int, batch_size: int, num_workers: int, log_dir: str, top_k: int = 1, suffix: str = '', shuffle: bool = False, orator: bool = False, **kwargs):
     """
     Args
     - model: NN model
@@ -76,6 +76,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     - top_k: use top_k accuracy to compute Fourier heatmap
     - log_dir: log directory
     - suffix: suffix of log
+    - shuffle: shuffle dataset
     - orator: if True, show current result
     """
 
@@ -106,7 +107,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
                 num_samples = min(num_samples, len(dataset))
                 indices = [i for i in range(num_samples)]
                 dataset = torch.utils.data.Subset(dataset, indices)
-            loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+            loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
             with torch.autograd.no_grad():
                 num_correct = 0.0
