@@ -70,7 +70,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     - h_map_size: height of Fourier heatmap
     - w_map_size: width of Fourier heatmap
     - eps: perturbation size
-    - num_samples: number of samples
+    - num_samples: number of samples. if -1, use all samples
     - batch_size: size of batch
     - num_workers: number of workers
     - top_k: use top_k accuracy to compute Fourier heatmap
@@ -83,7 +83,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     assert (h_map_size % 2 == 1) and (h_map_size > 0), 'h_map_size should be odd because of symmetry'
     assert (w_map_size % 2 == 1) and (w_map_size > 0), 'w_map_size should be odd because of symmetry'
     assert eps > 0.0, 'eps should be larger than 0.0'
-    assert num_samples > 0, 'num_samples should be larger than 0'
+    assert (num_samples > 0) or (num_samples == -1), 'num_samples should be larger than 0'
     assert batch_size > 0, 'batch_size should be larger than 0'
     assert num_workers > 0, 'num_workers should be larger than 0'
     assert top_k > 0, 'top_k should be larger than 0'
