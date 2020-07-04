@@ -146,6 +146,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     torchvision.utils.save_image(torch.stack(images_list, dim=0), os.path.join(log_dir, 'example_images' + suffix + '.png'), nrow=w_map_size)
     sns.heatmap(error_matrix.numpy(), vmin=0.0, vmax=1.0, cmap="jet", cbar=True, xticklabels=False, yticklabels=False)
     plt.savefig(os.path.join(log_dir, 'fhmap' + suffix + '.png'))
+    plt.close('all')  # this is needed for continuous figure generation.
 
 
 if __name__ == '__main__':
