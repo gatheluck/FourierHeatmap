@@ -62,7 +62,7 @@ class AddFourierNoise(object):
         return torch.clamp(x + fourier_noise, min=0.0, max=1.0)
 
 
-def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: int, eps: float, num_samples: int, batch_size: int, num_workers: int, log_dir: str, top_k: int = 1, suffix: str = '', shuffle: bool = False, orator: bool = False, **kwargs):
+def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: int, eps: float, norm_type: str, num_samples: int, batch_size: int, num_workers: int, log_dir: str, top_k: int = 1, suffix: str = '', shuffle: bool = False, orator: bool = False, **kwargs):
     """
     Args
     - model: NN model
@@ -70,6 +70,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     - h_map_size: height of Fourier heatmap
     - w_map_size: width of Fourier heatmap
     - eps: perturbation size
+    - norm_type: type of norm to normalize Fourier basis
     - num_samples: number of samples. if -1, use all samples
     - batch_size: size of batch
     - num_workers: number of workers
@@ -83,6 +84,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     assert (h_map_size % 2 == 1) and (h_map_size > 0), 'h_map_size should be odd because of symmetry'
     assert (w_map_size % 2 == 1) and (w_map_size > 0), 'w_map_size should be odd because of symmetry'
     assert eps > 0.0, 'eps should be larger than 0.0'
+    assert norm_type in 'linf l2'.split(), 'value of norm_type option is invalid.'
     assert (num_samples > 0) or (num_samples == -1), 'num_samples should be larger than 0'
     assert batch_size > 0, 'batch_size should be larger than 0'
     assert num_workers > 0, 'num_workers should be larger than 0'
@@ -101,7 +103,7 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
     for h_index in tqdm.tqdm(range(-max_n_h, 1)):  # do not need to run until max_n_h+1 because of symetry.
         for w_index in range(-max_n_w, max_n_w + 1):
             # generate dataset with Fourier basis noise
-            fourier_noise = AddFourierNoise(h_index, w_index, eps)
+            fourier_noise = AddFourierNoise(h_index, w_index, eps, norm_type=norm_type)
             dataset = dataset_builder(train=False, normalize=True, optional_transform=[fourier_noise])
             if num_samples != -1:
                 num_samples = min(num_samples, len(dataset))
