@@ -42,17 +42,19 @@ class AddFourierNoise(object):
 
         fourier_base = generate_fourier_base(h, w, self.h_index, self.w_index)  # l2 normalized fourier base
 
-        if self.norm_type == 'linf':
-            fourier_base /= fourier_base.abs().max()
-            fourier_base *= self.eps / 255.0
-        elif self.norm_type == 'l2':
-            fourier_base /= fourier_base.norm()
-            eps_l2 = np.sqrt(((self.eps / 255.0)**2.0) * h * w)
-            fourier_base *= eps_l2
-        else:
-            raise NotImplementedError
+        # if self.norm_type == 'linf':
+        #     fourier_base /= fourier_base.abs().max()
+        #     fourier_base *= self.eps / 255.0
+        # elif self.norm_type == 'l2':
+        #     fourier_base /= fourier_base.norm()
+        #     eps_l2 = np.sqrt(((self.eps / 255.0)**2.0) * h * w)
+        #     fourier_base *= eps_l2
+        # else:
+        #     raise NotImplementedError
+        fourier_base /= fourier_base.norm()
+        fourier_base *= self.eps / 255.0
 
-        fourier_noise = fourier_base.unsqueeze(0).repeat(c, 1, 1)
+        fourier_noise = fourier_base.unsqueeze(0).repeat(c, 1, 1)  # (c, h, w)
 
         # multiple random noise form [-1, 1]
         fourier_noise[0, :, :] *= random.randrange(-1, 2, 2)
