@@ -52,7 +52,7 @@ class AddFourierNoise(object):
         # else:
         #     raise NotImplementedError
         fourier_base /= fourier_base.norm()
-        fourier_base *= self.eps / 255.0
+        fourier_base *= self.eps  # this looks might be same as original implementation.
 
         fourier_noise = fourier_base.unsqueeze(0).repeat(c, 1, 1)  # (c, h, w)
 
