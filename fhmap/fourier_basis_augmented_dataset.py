@@ -1,9 +1,15 @@
+import os
+import sys
+
+base = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../')
+sys.path.append(base)
+
 import random
 import numpy as np
 import torch
 import torchvision
 
-from fourier_heatmap import AddFourierNoise
+from fhmap.fourier_heatmap import AddFourierNoise
 
 
 class FourierBasisAugmentedDataset():
