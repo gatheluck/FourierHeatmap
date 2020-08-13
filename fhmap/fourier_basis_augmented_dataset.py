@@ -38,8 +38,11 @@ class FourierBasisAugmentedDataset():
         x, t = self.basedataset[index]
         c, h, w = x.shape[-3:]
 
-        h_index = random.randrange(-self.h_index, 1) if self.randomize_index else self.h_index
-        w_index = random.randrange(-self.w_index, self.w_index + 1) if self.randomize_index else self.w_index
+        h_index = random.randrange(self.h_index, 1) if self.randomize_index else self.h_index
+        if self.w_index >= 0:
+            w_index = random.randrange(-self.w_index, self.w_index + 1) if self.randomize_index else self.w_index
+        else:
+            w_index = random.randrange(self.w_index, -self.w_index + 1) if self.randomize_index else self.w_index
 
         x = AddFourierNoise(h_index, w_index, eps=self.eps, norm_type='l2')(x)
 
