@@ -38,11 +38,21 @@ class FourierBasisAugmentedDataset():
         x, t = self.basedataset[index]
         c, h, w = x.shape[-3:]
 
-        h_index = random.randrange(self.h_index, 1) if self.randomize_index else self.h_index
-        if self.w_index >= 0:
-            w_index = random.randrange(-self.w_index, self.w_index + 1) if self.randomize_index else self.w_index
+        if self.randomize_index:
+            h_index = random.randrange(self.h_index, 1)
+            if h_index == 0:
+                if self.w_index >= 0:
+                    w_index = random.randrange(-self.w_index, 1)
+                else:
+                    w_index = random.randrange(self.w_index, 1)
+            else:
+                if self.w_index >= 0:
+                    w_index = random.randrange(-self.w_index, self.w_index + 1)
+                else:
+                    w_index = random.randrange(self.w_index, -self.w_index + 1)
         else:
-            w_index = random.randrange(self.w_index, -self.w_index + 1) if self.randomize_index else self.w_index
+            h_index = self.h_index
+            w_index = self.w_index
 
         x = AddFourierNoise(h_index, w_index, eps=self.eps, norm_type='l2')(x)
 
@@ -83,7 +93,7 @@ if __name__ == '__main__':
 
     for ih in range(-15, 1):
         for iw in range(-15, 16):
-            fbaug_dataset = FourierBasisAugmentedDataset(dataset, input_size=32, mean=mean, std=std, h_index=ih, w_index=iw, eps=4.0, randomize_index=False, normalize=False)
+            fbaug_dataset = FourierBasisAugmentedDataset(dataset, input_size=32, mean=mean, std=std, h_index=ih, w_index=iw, eps=4.0, randomize_index=False, normalize=False, mode='index')
 
             loader = torch.utils.data.DataLoader(fbaug_dataset, batch_size=8, shuffle=False, num_workers=8, pin_memory=True)
 
