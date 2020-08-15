@@ -38,6 +38,7 @@ class FourierBasisAugmentedDataset():
         x, t = self.basedataset[index]
         c, h, w = x.shape[-3:]
 
+        # get index of Fourier Basis
         if self.randomize_index:
             h_index = random.randrange(self.h_index, 1)
             if h_index == 0:
@@ -54,11 +55,16 @@ class FourierBasisAugmentedDataset():
             h_index = self.h_index
             w_index = self.w_index
 
+        # add Fourier Basis
         x = AddFourierNoise(h_index, w_index, eps=self.eps, norm_type='l2')(x)
 
         if self.normalize:
             x = torchvision.transforms.Normalize(mean=self.mean, std=self.std)(x)
 
+        # clamp between [0.0, 1.0]
+        # x = torch.clamp(min=0.0, max=1.0)
+
+        # get target label for Fourier Basis
         t_fb = self._get_target_label(h_index, w_index, self.mode)
 
         return x, t, t_fb
