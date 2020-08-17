@@ -102,46 +102,51 @@ def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: 
 
     max_n_h = int(np.floor(h_map_size / 2.0))
     max_n_w = int(np.floor(w_map_size / 2.0))
-    for h_index in tqdm.tqdm(range(-max_n_h, 1)):  # do not need to run until max_n_h+1 because of symetry.
-        for w_index in range(-max_n_w, max_n_w + 1):
-            # generate dataset with Fourier basis noise
-            fourier_noise = AddFourierNoise(h_index, w_index, eps, norm_type=norm_type)
-            dataset = dataset_builder(train=False, normalize=True, optional_transform=[fourier_noise])
-            if num_samples != -1:
-                num_samples = min(num_samples, len(dataset))
-                indices = [i for i in range(num_samples)]
-                dataset = torch.utils.data.Subset(dataset, indices)
-            loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
-            with torch.autograd.no_grad():
-                num_correct = 0.0
-                for i, (x, t) in enumerate(loader):
-                    model.eval()
-                    x = x.to('cuda', non_blocking=True)
-                    t = t.to('cuda', non_blocking=True)
+    with tqdm.tqdm(total=(max_n_h + 1) * ((2 * max_n_w) + 1), ncols=80) as pbar:
+        for h_index in range(-max_n_h, 1):  # do not need to run until max_n_h+1 because of symetry.
+            for w_index in range(-max_n_w, max_n_w + 1):
+                # generate dataset with Fourier basis noise
+                fourier_noise = AddFourierNoise(h_index, w_index, eps, norm_type=norm_type)
+                dataset = dataset_builder(train=False, normalize=True, optional_transform=[fourier_noise])
+                if num_samples != -1:
+                    num_samples = min(num_samples, len(dataset))
+                    indices = [i for i in range(num_samples)]
+                    dataset = torch.utils.data.Subset(dataset, indices)
+                loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
-                    model.zero_grad()
-                    logit = model(x)
-                    num_correct += get_num_correct(logit, t, topk=top_k)
+                with torch.autograd.no_grad():
+                    num_correct = 0.0
+                    for i, (x, t) in enumerate(loader):
+                        model.eval()
+                        x = x.to('cuda', non_blocking=True)
+                        t = t.to('cuda', non_blocking=True)
 
-                    if i == 0:
-                        images_list_former_half.append(x[10])
-                        if h_index != 0:
-                            images_list_latter_half.appendleft(x[10])
+                        model.zero_grad()
+                        logit = model(x)
+                        num_correct += get_num_correct(logit, t, topk=top_k)
 
-                acc = num_correct / float(len(dataset))
+                        if i == 0:
+                            images_list_former_half.append(x[10])
+                            if h_index != 0:
+                                images_list_latter_half.appendleft(x[10])
 
-                h_matrix_index = int(np.floor(h_map_size / 2)) + h_index
-                w_matrix_index = int(np.floor(w_map_size / 2)) + w_index
-                error_matrix[h_matrix_index, w_matrix_index] = 1.0 - acc
+                    acc = num_correct / float(len(dataset))
 
-                if h_index != 0:
-                    error_matrix[h_map_size - h_matrix_index - 1,
-                                 w_map_size - w_matrix_index - 1] = 1.0 - acc
+                    h_matrix_index = int(np.floor(h_map_size / 2)) + h_index
+                    w_matrix_index = int(np.floor(w_map_size / 2)) + w_index
+                    error_matrix[h_matrix_index, w_matrix_index] = 1.0 - acc
 
-            # print('({h_index},{w_index}) error: {error}'.format(h_index=h_index, w_index=w_index, error=1.0-acc))
-        if orator:
-            print(error_matrix)
+                    if h_index != 0:
+                        error_matrix[h_map_size - h_matrix_index - 1,
+                                     w_map_size - w_matrix_index - 1] = 1.0 - acc
+
+                    pbar.set_postfix(collections.OrderedDict(h_index=h_index, w_index=w_index, err=1.0 - acc))
+                    pbar.update()
+
+                # print('({h_index},{w_index}) error: {error}'.format(h_index=h_index, w_index=w_index, error=1.0-acc))
+            if orator:
+                print(error_matrix)
 
     # logging
     torch.save(error_matrix, os.path.join(log_dir, 'fhmap_data' + suffix + '.pth'))
