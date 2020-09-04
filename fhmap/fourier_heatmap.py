@@ -63,6 +63,24 @@ class AddFourierNoise(object):
 
         return torch.clamp(x + fourier_noise, min=0.0, max=1.0)
 
+    @classmethod
+    def calc_fourier_noise(cls, c: int, h: int, w: int, h_index: int, w_index: int, eps: float):
+        assert c > 0 and h > 0 and w > 0
+        assert abs(h_index) <= np.floor(h / 2) and abs(w_index) <= np.floor(w / 2)
+
+        fourier_base = generate_fourier_base(h, w, h_index, w_index)  # l2 normalized fourier base
+        fourier_base /= fourier_base.norm()
+        fourier_base *= eps  # this looks might be same as original implementation.
+
+        fourier_noise = fourier_base.unsqueeze(0).repeat(c, 1, 1)  # (c, h, w)
+
+        # multiple random noise form [-1, 1]
+        fourier_noise[0, :, :] *= random.randrange(-1, 2, 2)
+        fourier_noise[1, :, :] *= random.randrange(-1, 2, 2)
+        fourier_noise[2, :, :] *= random.randrange(-1, 2, 2)
+
+        return fourier_noise
+
 
 def create_fourier_heatmap(model, dataset_builder, h_map_size: int, w_map_size: int, eps: float, norm_type: str, num_samples: int, batch_size: int, num_workers: int, log_dir: str, top_k: int = 1, suffix: str = '', shuffle: bool = False, orator: bool = False, **kwargs):
     """
