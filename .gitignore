@@ -1,5 +1,8 @@
 __pycache__
+.mypy_cache
 .pytest_cache
+.python-version
+.venv
 .vscode
 .DS_Store
 logs
