@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "fhmap"
+version = "0.2.0"
+description = "Unofficial pytorch implementation of Fourier Heat Map proposed in 'A Fourier Perspective on Model Robustness in Computer Vision' [Yin+, NeurIPS2019]"
+authors = ["gatheluck <gatheluck+tech@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+torch = "^1.8.1"
+torchvision = "^0.9.1"
+pandas = "^1.2.3"
+hydra-core = "^1.0.6"
+pytorch-lightning = "^1.2.6"
+matplotlib = "^3.4.1"
+seaborn = "^0.11.1"
+
+[tool.poetry.dev-dependencies]
+pysen = "^0.9.1"
+pytest = "^6.2.2"
+isort = "^5.8.0"
+black = "^20.8b1"
+flake8 = "^3.9.0"
+mypy = "^0.812"
+
+[tool.pysen]
+version = "0.9.1"
+
+[tool.pysen.lint]
+enable_black = true
+enable_flake8 = true
+enable_isort = true
+enable_mypy = true
+mypy_preset = "strict"
+py_version = "py39"
+[[tool.pysen.lint.mypy_targets]]
+    paths = ["fhmap"]
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
