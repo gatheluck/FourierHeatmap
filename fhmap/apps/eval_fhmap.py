@@ -46,15 +46,25 @@ def eval_error(
 
 
 def save_fhmap(
-    error_matrix: torch.Tensor, save_dir: pathlib.Path, suffix: str = ""
+    error_matrix: torch.Tensor, savedir: pathlib.Path, suffix: str = ""
 ) -> None:
+    """
+
+    Args:
+        error_matrix (torch.Tensor):
+        savedir (pathlib.Path):
+        suffix (str):
+
+    """
+    # drop the edge for fliping
+    error_matrix = error_matrix[1:, :-1]
 
     # fill left side of error_matrix
     error_matrix = torch.cat(
         [torch.flip(error_matrix, (0, 1))[:, :-1], error_matrix], dim=1
     )
 
-    torch.save(error_matrix, save_dir / ("fhmap_data" + suffix + ".pth"))
+    torch.save(error_matrix, savedir / ("fhmap_data" + suffix + ".pth"))
     sns.heatmap(
         error_matrix.numpy(),
         vmin=0.0,
@@ -64,7 +74,7 @@ def save_fhmap(
         xticklabels=False,
         yticklabels=False,
     )
-    plt.savefig(save_dir / ("fhmap" + suffix + ".png"))
+    plt.savefig(savedir / ("fhmap" + suffix + ".png"))
     plt.close("all")  # this is needed for continuous figure generation.
 
 
@@ -109,6 +119,7 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     device: Final = "cuda" if cfg.env.gpus > 0 else "cpu"
     cwd: Final[pathlib.Path] = pathlib.Path(hydra.utils.get_original_cwd())
     weightpath: Final[pathlib.Path] = pathlib.Path(cfg.weightpath)
+    savedir: Final[pathlib.Path] = pathlib.Path(cfg.env.savedir)
 
     # Setup model
     arch = instantiate(cfg.arch)
@@ -123,6 +134,8 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
 
     height: Final[int] = datamodule.input_size
     width: Final[int] = height // 2 + 1
+
+    assert height % 2 == 0, "currently we only support even input size."
 
     error_matrix_top1 = torch.zeros(height * width).float()
     error_matrix_top5 = torch.zeros(height * width).float()
@@ -154,8 +167,8 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     error_matrix_top1 = error_matrix_top1.view(height, width)
     error_matrix_top5 = error_matrix_top5.view(height, width)
 
-    save_fhmap(error_matrix_top1 / 100.0, cfg.env.save_dir, "_top1")
-    save_fhmap(error_matrix_top5 / 100.0, cfg.env.save_dir, "_top5")
+    save_fhmap(error_matrix_top1 / 100.0, savedir, "_top1")
+    save_fhmap(error_matrix_top5 / 100.0, savedir, "_top5")
 
 
 if __name__ == "__main__":
