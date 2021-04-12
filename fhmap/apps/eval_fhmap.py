@@ -28,7 +28,14 @@ def eval_error(
     loader: DataLoader,
     device: torch.device,
 ) -> Tuple[float, float]:
-    """"""
+    """Return top1 and top5 mean errors.
+
+    Args:
+        arch (nn.Module): The architecture to be evaluated.
+        loader (DataLoader): The data loader
+        device (torch.device): The device used for calculation.
+
+    """
     arch = arch.to(device)
     err1_list, err5_list = list(), list()
 
@@ -48,14 +55,17 @@ def eval_error(
 def save_fhmap(
     error_matrix: torch.Tensor, savedir: pathlib.Path, suffix: str = ""
 ) -> None:
-    """
+    """Save Fourier Heat Map as a png image.
 
     Args:
-        error_matrix (torch.Tensor):
-        savedir (pathlib.Path):
-        suffix (str):
+        error_matrix (torch.Tensor): The matrix of errors. The size of error matrix should be (H, H/2+1). Here, H is height of image.
+        savedir (pathlib.Path): Path to the directory where the results will be saved.
+        suffix (str): Suffix which is attached to result file of Fourier Heat Map.
 
     """
+    assert len(error_matrix.size()) == 2
+    assert error_matrix.size(0) == 2 * (error_matrix.size(1) - 1)
+
     # drop the edge for fliping
     error_matrix = error_matrix[1:, :-1]
 
@@ -80,6 +90,18 @@ def save_fhmap(
 
 @dataclass
 class EvalFhmapConfig:
+    """
+
+    Attributes:
+        arch (schema.ArchConfig): The config of architecture.
+        env (schema.EnvConfig): The config of computational environment.
+        dataset (schema.DatasetConfig): The config of dataset.
+        batch_size (int): The size of batch.
+        num_samples (int): The  number of samples used from dataset. If -1, use all samples.
+        eps (float): The L2 norm size of Fourier basis.
+        weightpath (str): The path to pytorch model weight.
+
+    """
     # grouped configs
     arch: schema.ArchConfig = schema.Resnet56Config  # type: ignore
     env: schema.EnvConfig = schema.DefaultEnvConfig  # type: ignore
@@ -99,14 +121,23 @@ cs.store(group="arch", name="resnet56", node=schema.Resnet56Config)
 cs.store(group="arch", name="wideresnet40", node=schema.Wideresnet40Config)
 # dataset
 cs.store(group="dataset", name="cifar10", node=schema.Cifar10Config)
+cs.store(group="dataset", name="imagenet100", node=schema.Imagenet100Config)
 cs.store(group="dataset", name="imagenet", node=schema.ImagenetConfig)
 # env
 cs.store(group="env", name="default", node=schema.DefaultEnvConfig)
 
 
-@hydra.main(config_name="eval_fhmap")
+@hydra.main(config_path="../config", config_name="eval_fhmap")
 def eval_fhmap(cfg: EvalFhmapConfig) -> None:
-    """"""
+    """Evalutate Fourier heat map. The result is saved under outpus/eval_fhmap.
+
+    Note:
+        Currently, we only supports the input of even-sized images.
+
+    Args:
+        cfg (EvalFhmapConfig): The config of Fourier heat map evaluation.
+
+    """
     # Make config read only.
     # without this, config values might be changed accidentally.
     OmegaConf.set_readonly(cfg, True)  # type: ignore
@@ -121,26 +152,26 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     weightpath: Final[pathlib.Path] = pathlib.Path(cfg.weightpath)
     savedir: Final[pathlib.Path] = pathlib.Path(cfg.env.savedir)
 
-    # Setup model
-    arch = instantiate(cfg.arch)
-    arch.load_state_dict(torch.load(weightpath))
-    arch = arch.to(device)
-    arch.eval()
-
     # Setup datamodule
     root: Final[pathlib.Path] = cwd / "data"
     datamodule = instantiate(cfg.dataset, cfg.batch_size, cfg.env.num_workers, root)
     datamodule.prepare_data()
 
+    # Setup model
+    arch = instantiate(cfg.arch, num_classes=datamodule.num_classes)
+    arch.load_state_dict(torch.load(weightpath))
+    arch = arch.to(device)
+    arch.eval()
+
+    # height and width of error_matrix
+    # Note: Since Fourier Heat Map has origin symmetry, it is sufficient to calculate only half the region about width.
     height: Final[int] = datamodule.input_size
     width: Final[int] = height // 2 + 1
-
     assert height % 2 == 0, "currently we only support even input size."
 
     error_matrix_top1 = torch.zeros(height * width).float()
     error_matrix_top5 = torch.zeros(height * width).float()
 
-    # Create Fourier heat map
     spectrum = fourier.get_basis_spectrum(height, width, low_center=True)
 
     with tqdm(
