@@ -16,4 +16,4 @@ class DefaultEnvConfig(EnvConfig):
     gpus: int = 1
     num_nodes: int = 1
     num_workers: int = 8
-    savedir: str = "."
+    savedir: str = "outputs"
