@@ -37,6 +37,14 @@ class Cifar10Stats(DatasetStats):
 
 
 @dataclass(frozen=True)
+class Imagenet100Stats(DatasetStats):
+    num_classes: int = 100
+    input_size: int = 224
+    mean: Tuple[float, float, float] = (0.485, 0.456, 0.406)
+    std: Tuple[float, float, float] = (0.229, 0.224, 0.225)
+
+
+@dataclass(frozen=True)
 class ImagenetStats(DatasetStats):
     num_classes: int = 1000
     input_size: int = 224
@@ -192,6 +200,35 @@ class Cifar10DataModule(BaseDataModule):
             root=self.root,
             train=False,
             download=True,
+            transform=self._get_transform(kwargs["basis"]),
+        )
+
+
+class Imagenet100DataModule(BaseDataModule):
+    """The LightningDataModule for ImageNet-100 dataset.
+
+    Attributes:
+        dataset_stats (DatasetStats): The dataclass which holds dataset statistics.
+        root (pathlib.Path): The root path which dataset exists.
+
+    """
+
+    def __init__(self, batch_size: int, num_workers: int, root: pathlib.Path) -> None:
+        super().__init__(batch_size, num_workers, root)
+        self.dataset_stats: DatasetStats = Imagenet100Stats()
+        self.root: Final[pathlib.Path] = root / "imagenet100"
+
+    def prepare_data(self, *args, **kwargs) -> None:
+        """check if ImageNet dataset exists (DO NOT assign train/val here)."""
+        if not (self.root / "val").exists():
+            raise ValueError(
+                f"Please download and set ImageNet-1k val data under {self.root}."
+            )
+
+    def setup(self, stage=None, *args, **kwargs) -> None:
+        """Assign test dataset"""
+        self.test_dataset: Dataset = torchvision.datasets.ImageFolder(
+            root=self.root / "val",
             transform=self._get_transform(kwargs["basis"]),
         )
 
