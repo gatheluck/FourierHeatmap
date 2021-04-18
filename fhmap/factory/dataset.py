@@ -52,6 +52,9 @@ class ImagenetStats(DatasetStats):
     std: Tuple[float, float, float] = (0.229, 0.224, 0.225)
 
 
+# NOTE: If you want to add your dataset, please implement YourCustomDatasetStats class here.
+
+
 def get_transform(
     input_size: int,
     mean: Tuple[float, float, float],
@@ -260,3 +263,6 @@ class ImagenetDataModule(BaseDataModule):
             root=self.root / "val",
             transform=self._get_transform(kwargs["basis"]),
         )
+
+
+# NOTE: If you want to add your dataset, please implement YourCustomDataModule class here.

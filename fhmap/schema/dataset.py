@@ -21,3 +21,6 @@ class Imagenet100Config(DatasetConfig):
 @dataclass()
 class ImagenetConfig(DatasetConfig):
     _target_: str = "fhmap.factory.dataset.ImagenetDataModule"
+
+
+# NOTE: If you want to add your dataset, please implement YourCustomDatasetConfig class here.

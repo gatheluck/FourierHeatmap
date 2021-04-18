@@ -26,3 +26,5 @@ class Wideresnet40Config(ArchConfig):
     _target_: str = "fhmap.factory.archs.wideresnet.wideresnet40"
     widening_factor: int = MISSING
     droprate: float = MISSING
+
+# NOTE: If you want to add your architecture, please implement YourCustomArchConfig class here.
