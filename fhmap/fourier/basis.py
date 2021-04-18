@@ -56,3 +56,25 @@ def get_basis_spectrum(
         return torch.cat([spectrum[B // 2 :], spectrum[: B // 2]])
     else:
         return spectrum
+
+
+if __name__ == "__main__":
+    import pathlib
+    from typing import Final
+    import torchvision
+
+    height: Final = 32
+    width: Final = 17
+    image_size: Final = height
+    padding: Final = 2
+
+    savedir: Final = pathlib.Path("outputs")
+    savedir.mkdir(exist_ok=True)
+
+    spectrum = get_basis_spectrum(height, width, low_center=True)
+    basis = spectrum_to_basis(spectrum, l2_normalize=True) * 10.0
+
+    basis_rightside = torchvision.utils.make_grid(basis[:, None, :, :], nrow=width, padding=padding)[:, (image_size + padding):, :-(image_size + padding)]
+    basis_leftside = torch.flip(basis_rightside, (-2, -1))
+    all_basis = torch.cat([basis_leftside[:, :, :-(image_size + padding)], basis_rightside[:, :, padding:]], dim=-1)
+    torchvision.utils.save_image(all_basis, savedir / "basis.png", nrow=width)
