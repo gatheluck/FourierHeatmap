@@ -46,7 +46,7 @@ def eval_mean_errors(
     arch: nn.Module,
     loader: DataLoader,
     device: torch.device,
-    topk: Tuple[int, ...] = (1,)
+    topk: Tuple[int, ...] = (1,),
 ) -> List[float]:
     """Evaluate top-k mean errors of the architecture over given dataloader.
 

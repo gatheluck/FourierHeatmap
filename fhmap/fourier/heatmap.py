@@ -13,7 +13,9 @@ import fhmap.fourier as fourier
 from fhmap.factory.dataset import BaseDataModule
 
 
-def create_fourier_heatmap_from_error_matrix(error_matrix: torch.Tensor) -> torch.Tensor:
+def create_fourier_heatmap_from_error_matrix(
+    error_matrix: torch.Tensor,
+) -> torch.Tensor:
     """Create Fourier Heat Map from error matrix (about quadrant 1 and 4).
 
     Note:
@@ -68,7 +70,7 @@ def eval_fourier_heatmap(
     num_samples: int,
     eps: float,
     device: torch.device,
-    topk: Tuple[int, ...] = (1,)
+    topk: Tuple[int, ...] = (1,),
 ) -> List[torch.Tensor]:
     """Evaluate Fourier Heat Map about given architecture and dataset.
 
@@ -103,7 +105,9 @@ def eval_fourier_heatmap(
             datamodule.setup("test", basis=basis)
             loader = datamodule.test_dataloader(num_samples)
 
-            for k, mean_err in zip(topk, fhmap.eval_mean_errors(arch, loader, device, topk)):
+            for k, mean_err in zip(
+                topk, fhmap.eval_mean_errors(arch, loader, device, topk)
+            ):
                 error_matrix_dict[k][i] = mean_err
 
             # show result to pbar
@@ -113,4 +117,9 @@ def eval_fourier_heatmap(
             pbar.set_postfix(results)
             pbar.update()
 
-    return [create_fourier_heatmap_from_error_matrix(error_matrix_dict[k].view(height, width)) for k in topk]
+    return [
+        create_fourier_heatmap_from_error_matrix(
+            error_matrix_dict[k].view(height, width)
+        )
+        for k in topk
+    ]

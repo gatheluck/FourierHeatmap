@@ -27,4 +27,5 @@ class Wideresnet40Config(ArchConfig):
     widening_factor: int = MISSING
     droprate: float = MISSING
 
+
 # NOTE: If you want to add your architecture, please implement YourCustomArchConfig class here.

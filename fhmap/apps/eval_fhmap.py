@@ -31,6 +31,7 @@ class EvalFhmapConfig:
         weightpath (str): The path to pytorch model weight.
 
     """
+
     # grouped configs
     arch: schema.ArchConfig = schema.Resnet56Config  # type: ignore
     env: schema.EnvConfig = schema.DefaultEnvConfig  # type: ignore
@@ -105,7 +106,9 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     )
 
     for k, fourier_heatmap in zip(cfg.topk, fhmaps):
-        heatmap.save_fourier_heatmap(fourier_heatmap / 100.0, pathlib.Path("."), f"_top{k}")
+        heatmap.save_fourier_heatmap(
+            fourier_heatmap / 100.0, pathlib.Path("."), f"_top{k}"
+        )
 
 
 if __name__ == "__main__":

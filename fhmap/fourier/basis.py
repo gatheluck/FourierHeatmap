@@ -53,6 +53,6 @@ def get_basis_spectrum(
     spectrum = torch.nn.functional.one_hot(x).view(-1, height, width).float()
     if low_center:
         B = height * width
-        return torch.cat([spectrum[B // 2:], spectrum[:B // 2]])
+        return torch.cat([spectrum[B // 2 :], spectrum[: B // 2]])
     else:
         return spectrum
