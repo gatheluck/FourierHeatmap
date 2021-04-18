@@ -1,7 +1,0 @@
-defaults:
-  - dataset: cifar10
-  - misc
-
-hydra:
-  run:
-    dir: ../logs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
