@@ -1,9 +1,11 @@
 __pycache__
+.coverage
 .mypy_cache
 .pytest_cache
 .python-version
 .venv
 .vscode
 .DS_Store
+coverage.xml
 data/*
 outputs

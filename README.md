@@ -1,5 +1,8 @@
 # FourierHeatmap (latest release: v0.2.0)
 
+[![CI](https://github.com/gatheluck/fhmap/workflows/CI/badge.svg)](https://github.com/gatheluck/archs/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/gatheluck/archs/branch/master/graph/badge.svg)](https://codecov.io/gh/gatheluck/archs)
+
 This is an unofficial pytorch implementation of Fourier Heat Map which is proposed in the paper, [A Fourier Perspective on Model Robustness in Computer Vision [Yin+, NeurIPS2019]](https://arxiv.org/abs/1906.08988). 
 
 Fourier Heat Map allows to investigate the sensitivity of CNNs to high and low frequency corruptions via a perturbation analysis in the Fourier domain.
