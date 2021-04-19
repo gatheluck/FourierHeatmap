@@ -225,7 +225,7 @@ class Imagenet100DataModule(BaseDataModule):
         """check if ImageNet dataset exists (DO NOT assign train/val here)."""
         if not (self.root / "val").exists():
             raise ValueError(
-                f"Please download and set ImageNet-1k val data under {self.root}."
+                f"Please download and set ImageNet-100 val data under {self.root}."
             )
 
     def setup(self, stage=None, *args, **kwargs) -> None:
