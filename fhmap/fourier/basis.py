@@ -30,9 +30,9 @@ def get_spectrum(
         torch.Tensor: Generator of spectrum size of (H, W).
 
     """
+    B = height * width
     indices = torch.arange(height * width)
     if low_center:
-        B = height * width
         indices = torch.cat([indices[B // 2 :], indices[: B // 2]])
 
     # drop ignoring edges
