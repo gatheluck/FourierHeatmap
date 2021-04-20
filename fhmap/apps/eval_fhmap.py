@@ -24,11 +24,12 @@ class EvalFhmapConfig:
         arch (schema.ArchConfig): The config of architecture.
         env (schema.EnvConfig): The config of computational environment.
         dataset (schema.DatasetConfig): The config of dataset.
-        batch_size (int): The size of batch.
-        num_samples (int): The  number of samples used from dataset. If -1, use all samples.
-        eps (float): The L2 norm size of Fourier basis.
+        batch_size (int): A size of batch.
+        ignore_edge_size (int): A size of the edge to ignore.
+        eps (float): L2 norm size of Fourier basis.
+        num_samples (int): A number of samples used from dataset. If -1, use all samples.
         topk (Tuple): Tuple of int which you want to know error.
-        weightpath (str): The path to pytorch model weight.
+        weightpath (str): A path to pytorch model weight.
 
     """
 
@@ -38,8 +39,9 @@ class EvalFhmapConfig:
     dataset: schema.DatasetConfig = schema.Cifar10Config  # type: ignore
     # ungrouped configs
     batch_size: int = 512
-    num_samples: int = -1
     eps: float = 4.0
+    ignore_edge_size: int = 0
+    num_samples: int = -1
     topk: Tuple = (1, 5)
     weightpath: str = MISSING
 
@@ -88,19 +90,22 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     root: Final[pathlib.Path] = cwd / "data"
     datamodule = instantiate(cfg.dataset, cfg.batch_size, cfg.env.num_workers, root)
     datamodule.prepare_data()
+    logger.info("datamodule setup: done.")
 
     # Setup model
     arch = instantiate(cfg.arch, num_classes=datamodule.num_classes)
     arch.load_state_dict(torch.load(weightpath))
     arch = arch.to(device)
     arch.eval()
+    logger.info("architecture setup: done.")
 
     fhmaps = heatmap.eval_fourier_heatmap(
         datamodule.input_size,
+        cfg.ignore_edge_size,
+        cfg.eps,
         arch,
         datamodule,
         cfg.num_samples,
-        cfg.eps,
         cast(torch.device, device),  # needed for passing mypy check.
         cfg.topk,
     )
