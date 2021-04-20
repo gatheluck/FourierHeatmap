@@ -1,8 +1,5 @@
-import pathlib
-
 import pytest
 import torch
-import torchvision
 
 from fhmap.fourier import basis
 
