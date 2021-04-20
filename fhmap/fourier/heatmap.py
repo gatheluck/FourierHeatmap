@@ -64,22 +64,24 @@ def save_fourier_heatmap(
 
 
 def eval_fourier_heatmap(
-    height: int,
+    input_size: int,
+    ignore_edge_size: int,
+    eps: float,
     arch: nn.Module,
     datamodule: BaseDataModule,
     num_samples: int,
-    eps: float,
     device: torch.device,
     topk: Tuple[int, ...] = (1,),
 ) -> List[torch.Tensor]:
     """Evaluate Fourier Heat Map about given architecture and dataset.
 
     Args:
-        height (int):
+        input_size (int): A size of input image.
+        ignore_edge_size (int): A size of the edge to ignore.
+        eps (float): L2 norm size of Fourier basis.
         arch (nn.Module): An architecture to be evaluated.
         datamodule (BaseDataModule):
-        num_samples (int): The number of samples used from dataset. If -1, use all samples.
-        eps (float): The L2 norm size of Fourier basis.
+        num_samples (int): A number of samples used from dataset. If -1, use all samples.
         device (torch.device): A device used for calculation.
         topk (Tuple[int, ...], optional): Tuple of int which you want to know error.
 
@@ -87,21 +89,20 @@ def eval_fourier_heatmap(
         List[torch.Tensor]: List of Fourier Heat Map.
 
     """
-    assert height % 2 == 0, "currently we only support even input size."
+    assert input_size % 2 == 0, "currently we only support even input size."
+    height: Final[int] = input_size
     width: Final[int] = height // 2 + 1
+    fhmap_height: Final[int] = height - 2 * ignore_edge_size
+    fhmap_width: Final[int] = width - ignore_edge_size
 
-    error_matrix_dict = {k: torch.zeros(height * width).float() for k in topk}
-    spectrum = fourier.get_basis_spectrum(height, width, low_center=True)
+    error_matrix_dict = {k: torch.zeros(fhmap_height * fhmap_width).float() for k in topk}
 
     with tqdm(
-        torch.chunk(
-            fourier.spectrum_to_basis(spectrum, l2_normalize=True),
-            spectrum.size(0),
-        ),
+        fourier.get_spectrum(height, width, ignore_edge_size, ignore_edge_size, low_center=True),
         ncols=80,
     ) as pbar:
-        for i, basis in enumerate(pbar):  # Size of basis is [1, height, width]
-            basis = basis.squeeze(0) * eps
+        for i, spectrum in enumerate(pbar):  # Size of basis is [height, width]
+            basis = fourier.spectrum_to_basis(spectrum, l2_normalize=True) * eps
             datamodule.setup("test", basis=basis)
             loader = datamodule.test_dataloader(num_samples)
 
@@ -119,7 +120,7 @@ def eval_fourier_heatmap(
 
     return [
         create_fourier_heatmap_from_error_matrix(
-            error_matrix_dict[k].view(height, width)
+            error_matrix_dict[k].view(fhmap_height, fhmap_width)
         )
         for k in topk
     ]
