@@ -95,10 +95,14 @@ def eval_fourier_heatmap(
     fhmap_height: Final[int] = height - 2 * ignore_edge_size
     fhmap_width: Final[int] = width - ignore_edge_size
 
-    error_matrix_dict = {k: torch.zeros(fhmap_height * fhmap_width).float() for k in topk}
+    error_matrix_dict = {
+        k: torch.zeros(fhmap_height * fhmap_width).float() for k in topk
+    }
 
     with tqdm(
-        fourier.get_spectrum(height, width, ignore_edge_size, ignore_edge_size, low_center=True),
+        fourier.get_spectrum(
+            height, width, ignore_edge_size, ignore_edge_size, low_center=True
+        ),
         ncols=80,
     ) as pbar:
         for i, spectrum in enumerate(pbar):  # Size of basis is [height, width]
