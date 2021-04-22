@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/gatheluck/FourierHeatmap/workflows/CI/badge.svg)](https://github.com/gatheluck/FourierHeatmap/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/gatheluck/FourierHeatmap/branch/master/graph/badge.svg?token=17KIZNS046)](https://codecov.io/gh/gatheluck/FourierHeatmap)
+[![MIT License](https://img.shields.io/github/license/gatheluck/FourierHeatmap)](LICENSE)
 
 This is an unofficial pytorch implementation of Fourier Heat Map which is proposed in the paper, [A Fourier Perspective on Model Robustness in Computer Vision [Yin+, NeurIPS2019]](https://arxiv.org/abs/1906.08988). 
 
