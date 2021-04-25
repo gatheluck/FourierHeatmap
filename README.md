@@ -144,6 +144,15 @@ Now, you will be able to call your custom arch like following.
 poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=yourcustomarch weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
 ```
 
+## Use Docker
+```
+export HOST_DATADIR=[DATASET_DIRECTORY_PATH]
+export HOST_OUTPUTSDIR=[OUTPUTS_DIRECTORY_PATH]
+export WEIGHTPATH=[PYTORCH_MODEL_WEIGHT_PATH]
+cd provision/docker
+sudo -E docker-compose up
+```
+
 ## References
 
 - [Dong Yin, Raphael Gontijo Lopes, Jonathon Shlens, Ekin D. Cubuk, Justin Gilmer. "A Fourier Perspective on Model Robustness in Computer Vision.", in NeurIPS, 2019.](https://arxiv.org/abs/1906.08988)
