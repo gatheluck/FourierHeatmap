@@ -148,7 +148,8 @@ poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=yourcustomarch w
 ```
 export HOST_DATADIR=[DATASET_DIRECTORY_PATH]
 export HOST_OUTPUTSDIR=[OUTPUTS_DIRECTORY_PATH]
-export WEIGHTPATH=[PYTORCH_MODEL_WEIGHT_PATH]
+export HOST_WEIGHTDIR=[WEIGHT_DIRECTORY_PATH]
+export WEIGHTFILE=[PYTORCH_MODEL_FILE]
 cd provision/docker
 sudo -E docker-compose up
 ```
