@@ -118,5 +118,6 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
 
 if __name__ == "__main__":
     import os
+
     logger.info(os.system("ls -R"))
     eval_fhmap()
