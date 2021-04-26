@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  fhmap:
+    build:
+      context: ../../
+      dockerfile: provision/docker/Dockerfile
+      shm_size: '30G'
+    environment:
+      - ARCH=resnet56
+      - BATCH_SIZ=256
+      - DATASET=cifar10
+      - EPS=4.0
+      - IGNORE_EDGE_SIZE=0
+      - NUM_SAMPLES=512
+      - WEIGHTPATH
+    ports:
+      - 9000:8000
+    volumes:
+      - datadir:/var/data
+      - outputsdir:/var/outputs
+
+volumes:
+  datadir:
+    driver_opts:
+      type: none
+      device: ${HOST_DATADIR}
+      o: bind
+  outputsdir:
+    driver_opts:
+      type: none
+      device: ${HOST_OUTPUTSDIR}
+      o: bind
