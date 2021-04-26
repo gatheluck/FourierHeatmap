@@ -8,26 +8,24 @@ services:
       shm_size: '30G'
     environment:
       - ARCH=resnet56
-      - BATCH_SIZ=256
+      - BATCH_SIZE=256
       - DATASET=cifar10
       - EPS=4.0
       - IGNORE_EDGE_SIZE=0
       - NUM_SAMPLES=512
-      - WEIGHTPATH
+      - NVIDIA_VISIBLE_DEVICES=0
+      - WEIGHTFILE
     ports:
       - 9000:8000
+    # This is required for use GPU in the container
+    runtime: nvidia
     volumes:
-      - datadir:/var/data
-      - outputsdir:/var/outputs
-
-volumes:
-  datadir:
-    driver_opts:
-      type: none
-      device: ${HOST_DATADIR}
-      o: bind
-  outputsdir:
-    driver_opts:
-      type: none
-      device: ${HOST_OUTPUTSDIR}
-      o: bind
+      - type: bind
+        source: ${HOST_DATADIR}
+        target: /root/scratch/FourierHeatmap/data
+      - type: bind
+        source: ${HOST_OUTPUTSDIR}
+        target: /root/scratch/FourierHeatmap/outputs
+      - type: bind
+        source: ${HOST_WEIGHTDIR}
+        target: /root/scratch/FourierHeatmap/weight

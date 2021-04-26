@@ -119,5 +119,5 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
 if __name__ == "__main__":
     import os
 
-    logger.info(os.system("ls -R"))
+    logger.info(os.system("nvidia-smi"))
     eval_fhmap()
