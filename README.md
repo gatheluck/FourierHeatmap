@@ -11,9 +11,11 @@ Fourier Heat Map allows to investigate the sensitivity of CNNs to high and low f
 <img src="samples/FourierHeatmap-Teaser.png" height="300px">
 
 ## News
-We release v0.2.0. API is renewed and some useful libraries (e.g. [hydra](https://hydra.cc/docs/intro/)) are added.
+- We release v0.2.0. API is renewed and some useful libraries (e.g. [hydra](https://hydra.cc/docs/intro/)) are added.
 
-Previous version is still available as [v0.1.0](https://github.com/gatheluck/FourierHeatmap/tree/v0.1.0).
+- Previous version is still available as [v0.1.0](https://github.com/gatheluck/FourierHeatmap/tree/v0.1.0).
+
+- [Docker is supported](#Evaluating_Fourier_Heat_Map_through_Docker). Now, you can evaluate Fourier Heat Map on the Docker container.
 
 ## Requirements
 This library requires following as a pre-requisite.
@@ -27,10 +29,10 @@ This repo uses [poetry](https://python-poetry.org/) as a package manager.
 The following code will install all necessary libraries under `.venv/`.
 
 ```
-git clone git@github.com:gatheluck/FourierHeatmap.git
-cd FourierHeatmap
-pip install poetry  # If you haven't installed poetry yet.
-poetry install
+$ git clone git@github.com:gatheluck/FourierHeatmap.git
+$ cd FourierHeatmap
+$ pip install poetry  # If you haven't installed poetry yet.
+$ poetry install
 ```
 
 ## Setup
@@ -54,7 +56,7 @@ FourierHeatmap
 The script `fhmap/fourier/basis.py` generates Fourier base functions. For example:
 
 ```
-poetry run python fhmap/fourier/basis.py
+$ poetry run python fhmap/fourier/basis.py
 ```
 
 will generate 31x31 2D Fourier basis and save as an image under `outputs/basis.png`. The generated image should be like follows. 
@@ -67,7 +69,7 @@ The script `fhmap/apps/eval_fhmap.py`
 eveluate Fourier Heat Map for a model. For example:
 
 ```
-poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=resnet56 weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
+$ poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=resnet56 weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
 ```
 
 will generate 31x31 Fourier Heat Map for ResNet56 on CIFAR-10 dataset and save as an image under `outputs/eval_fhmap/`. The generated image should be like follows. 
@@ -114,7 +116,7 @@ If you want to evaluate Fourier Heat Map on your custom dataset, please refer fo
 Now, you will be able to call your custom dataset like following.
 
 ```
-poetry run python fhmap/apps/eval_fhmap.py dataset=yourcustomdataset arch=resnet50 weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
+$ poetry run python fhmap/apps/eval_fhmap.py dataset=yourcustomdataset arch=resnet50 weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
 ```
 
 ### Evaluating your custom architecture (model)
@@ -141,18 +143,67 @@ If you want to evaluate Fourier Heat Map on your custom architecture (model), pl
 Now, you will be able to call your custom arch like following.
 
 ```
-poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=yourcustomarch weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
+$ poetry run python fhmap/apps/eval_fhmap.py dataset=cifar10 arch=yourcustomarch weightpath=[PYTORCH_MODEL_WEIGHT_PATH] eps=4.0
 ```
 
-## Use Docker
+## Evaluating Fourier Heat Map through Docker
+In order to use FourierHeatmap throgh docker, please install Docker with [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/overview.html) beforehand. For detail, please refere [official installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installation-guide).
+
+If `nvidia-smi` is able to run through docker like following, it is successfully installed.
+
 ```
-export HOST_DATADIR=[DATASET_DIRECTORY_PATH]
-export HOST_OUTPUTSDIR=[OUTPUTS_DIRECTORY_PATH]
-export HOST_WEIGHTDIR=[WEIGHT_DIRECTORY_PATH]
-export WEIGHTFILE=[PYTORCH_MODEL_FILE]
-cd provision/docker
-sudo -E docker-compose up
+$ sudo docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+
+Tue Apr 27 06:46:09 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 450.102.04   Driver Version: 450.102.04   CUDA Version: 11.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 1080    Off  | 00000000:01:00.0  On |                  N/A |
+| N/A   56C    P0    42W /  N/A |   1809MiB /  8114MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
++-----------------------------------------------------------------------------+
+
 ```
+We use environmental variables to specify the arguments.
+The variables that can be specified and their meanings are as follows:
+
+| name | optional | default | description
+---- | ---- | ---- | ----
+| HOST_DATADIR    | False | | Path to the directory where the dataset is located in the host.
+| HOST_OUTPUTSDIR | False | | Path to the directory where the output will be located in the host.
+| HOST_WEIGHTDIR  | False | | Path to the directory where the pretrained wight is located in the host.
+| WEIGHTFILE      | False | | File name of the pretrained wight.
+| ARCH       | True | resnet56 | Name of the architecture.
+| BATCH_SIZE | True | 512      | Size of batch.
+| DATASET    | True | cifar10  | Name of dataset.
+| EPS        | True | 4.0      | L2 norm size of Fourier basis.
+| IGNORE_EDGE_SIZE  | True | 0 | Size of the edge to ignore.
+| NUM_SAMPLES       | True | -1| Number of samples used from dataset. If -1, use all samples.
+| NVIDIA_VISIBLE_DEVICES   | True | 0 | Device number (or list of number) visible from CUDA.
+
+For example:
+
+```
+$ export HOST_DATADIR=[DATASET_DIRECTORY_PATH]
+$ export HOST_OUTPUTSDIR=[OUTPUTS_DIRECTORY_PATH]
+$ export HOST_WEIGHTDIR=[WEIGHT_DIRECTORY_PATH]
+$ export WEIGHTFILE=[PYTORCH_MODEL_FILE]
+$ cd provision/docker
+$ sudo -E docker-compose up  # -E option is needed to inherit environment variables.
+```
+
+will generate 31x31 Fourier Heat Map for ResNet56 on CIFAR-10 dataset and save as an image under `OUTPUTS_DIRECTORY_PATH/eval_fhmap/`.
 
 ## References
 
