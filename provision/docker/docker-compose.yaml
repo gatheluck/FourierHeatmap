@@ -6,18 +6,20 @@ services:
       context: ../../
       dockerfile: provision/docker/Dockerfile
       shm_size: 30G
-    command: arch=${ARCH} batch_size=${BATCH_SIZE} dataset=${DATASET} eps=${EPS} ignore_edge_size=${IGNORE_EDGE_SIZE} num_samples=${NUM_SAMPLES} weightpath=/root/scratch/FourierHeatmap/weight/${WEIGHTFILE}
+    command: arch=${ARCH} batch_size=${BATCH_SIZE} dataset=${DATASET} eps=${EPS} ignore_edge_size=${IGNORE_EDGE_SIZE} num_samples=${NUM_SAMPLES} weightpath=${INSTALL_DIRECTORY}/FourierHeatmap/weight/${WEIGHTFILE}
     ports:
       - 9000:8000
-    # This is required for use GPU in the container
+    # Following is needed for use GPU in the container
     runtime: nvidia
+    # Following is needed for setting access permission of file
+    user: ${UID}:${GIU}
     volumes:
       - type: bind
         source: ${HOST_DATADIR}
-        target: /root/scratch/FourierHeatmap/data
+        target: ${INSTALL_DIRECTORY}/FourierHeatmap/data
       - type: bind
         source: ${HOST_OUTPUTSDIR}
-        target: /root/scratch/FourierHeatmap/outputs
+        target: ${INSTALL_DIRECTORY}/FourierHeatmap/outputs
       - type: bind
         source: ${HOST_WEIGHTDIR}
-        target: /root/scratch/FourierHeatmap/weight
+        target: ${INSTALL_DIRECTORY}/FourierHeatmap/weight
