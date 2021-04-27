@@ -5,16 +5,8 @@ services:
     build:
       context: ../../
       dockerfile: provision/docker/Dockerfile
-      shm_size: '30G'
-    environment:
-      - ARCH=resnet56
-      - BATCH_SIZE=256
-      - DATASET=cifar10
-      - EPS=4.0
-      - IGNORE_EDGE_SIZE=0
-      - NUM_SAMPLES=512
-      - NVIDIA_VISIBLE_DEVICES=0
-      - WEIGHTFILE
+      shm_size: 30G
+    command: arch=${ARCH} batch_size=${BATCH_SIZE} dataset=${DATASET} eps=${EPS} ignore_edge_size=${IGNORE_EDGE_SIZE} num_samples=${NUM_SAMPLES} weightpath=/root/scratch/FourierHeatmap/weight/${WEIGHTFILE}
     ports:
       - 9000:8000
     # This is required for use GPU in the container
