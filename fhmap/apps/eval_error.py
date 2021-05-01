@@ -5,10 +5,10 @@ from typing import Dict, Final, Tuple
 
 import hydra
 import torch
-from tqdm import tqdm
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import MISSING, OmegaConf
+from tqdm import tqdm
 
 import fhmap
 import fhmap.schema as schema

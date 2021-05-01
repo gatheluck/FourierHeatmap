@@ -196,7 +196,11 @@ class Cifar10DataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset """
-        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
+        transform = (
+            self._get_transform(kwargs["basis"])
+            if "basis" in kwargs
+            else self._get_transform()
+        )
         self.test_dataset: Dataset = torchvision.datasets.CIFAR10(
             root=self.root,
             train=False,
@@ -228,7 +232,11 @@ class Imagenet100DataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset"""
-        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
+        transform = (
+            self._get_transform(kwargs["basis"])
+            if "basis" in kwargs
+            else self._get_transform()
+        )
         self.test_dataset: Dataset = torchvision.datasets.ImageFolder(
             root=self.root / "val",
             transform=transform,
@@ -258,7 +266,11 @@ class ImagenetDataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset"""
-        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
+        transform = (
+            self._get_transform(kwargs["basis"])
+            if "basis" in kwargs
+            else self._get_transform()
+        )
         self.test_dataset: Dataset = torchvision.datasets.ImageFolder(
             root=self.root / "val",
             transform=transform,
