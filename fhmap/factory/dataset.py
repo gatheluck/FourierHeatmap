@@ -6,7 +6,7 @@ Todo:
 import logging
 import pathlib
 from dataclasses import dataclass
-from typing import Final, Tuple
+from typing import Final, Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -59,7 +59,7 @@ def get_transform(
     input_size: int,
     mean: Tuple[float, float, float],
     std: Tuple[float, float, float],
-    basis: torch.Tensor,
+    basis: Optional[torch.Tensor] = None,
     normalize: bool = True,
 ) -> torchvision.transforms.transforms.Compose:
     """return composed tranforms for PyTorch 2D image dataset.
@@ -68,7 +68,7 @@ def get_transform(
         input_size (int): The size of input image.
         mean (Tuple[float]): The means of dataset.
         std (Tuple[float]): The standard diviation of dataset.
-        basis (torch.Tensor): Scaled 2D Fourier basis.
+        basis (torch.Tensor, optional): Scaled 2D Fourier basis.
         normalize (bool, optional): If True, normalization is composed. Defaults to True.
 
     Returns:
@@ -90,12 +90,9 @@ def get_transform(
         raise NotImplementedError
 
     # Convert to tensor and add noise
-    transform.extend(
-        [
-            torchvision.transforms.ToTensor(),
-            AddFourierNoise(basis),
-        ]
-    )
+    transform.extend([torchvision.transforms.ToTensor()])
+    if basis is not None:
+        transform.extend([AddFourierNoise(basis)])
 
     # normalize
     if normalize:
@@ -153,7 +150,7 @@ class BaseDataModule(pl.LightningDataModule):
         )
 
     def _get_transform(
-        self, basis: torch.Tensor
+        self, basis: Optional[torch.Tensor] = None
     ) -> torchvision.transforms.transforms.Compose:
         return get_transform(
             input_size=self.dataset_stats.input_size,
@@ -199,11 +196,12 @@ class Cifar10DataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset """
+        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
         self.test_dataset: Dataset = torchvision.datasets.CIFAR10(
             root=self.root,
             train=False,
             download=True,
-            transform=self._get_transform(kwargs["basis"]),
+            transform=transform,
         )
 
 
@@ -230,9 +228,10 @@ class Imagenet100DataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset"""
+        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
         self.test_dataset: Dataset = torchvision.datasets.ImageFolder(
             root=self.root / "val",
-            transform=self._get_transform(kwargs["basis"]),
+            transform=transform,
         )
 
 
@@ -259,9 +258,10 @@ class ImagenetDataModule(BaseDataModule):
 
     def setup(self, stage=None, *args, **kwargs) -> None:
         """Assign test dataset"""
+        transform = self._get_transform(kwargs["basis"]) if "basis" in kwargs else self._get_transform()
         self.test_dataset: Dataset = torchvision.datasets.ImageFolder(
             root=self.root / "val",
-            transform=self._get_transform(kwargs["basis"]),
+            transform=transform,
         )
 
 
