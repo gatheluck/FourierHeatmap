@@ -1,7 +1,7 @@
 import logging
 import pathlib
 from dataclasses import dataclass
-from typing import Dict, Final, Tuple
+from typing import cast, Dict, Final, Tuple
 
 import hydra
 import torch
@@ -99,9 +99,9 @@ def eval_error(cfg: EvalErrorConfig) -> None:
     datamodule.setup("test")
     loader = datamodule.test_dataloader(cfg.num_samples)
 
-    error_dict: Dict[float] = dict()
+    error_dict: Dict[int, float] = dict()
     with tqdm(
-        zip(cfg.topk, fhmap.eval_mean_errors(arch, loader, device, cfg.topk)),
+        zip(cfg.topk, fhmap.eval_mean_errors(arch, loader, cast(torch.device, device), cfg.topk)),
         ncols=80,
     ) as pbar:
         for k, mean_err in pbar:
