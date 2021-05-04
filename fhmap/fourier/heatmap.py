@@ -138,8 +138,7 @@ def eval_fourier_heatmap(
     }
 
     spectrums = fourier.get_spectrum(height, width, ignore_edge_size, ignore_edge_size)
-    num_spectrums = (height - (2 * ignore_edge_size)) * (width - ignore_edge_size)
-    with tqdm(spectrums, ncols=160, total=num_spectrums) as pbar:  # without total progress par might not be shown.
+    with tqdm(spectrums, ncols=160, total=fhmap_height * fhmap_width) as pbar:  # without total progress par might not be shown.
         for i, spectrum in enumerate(pbar):  # Size of basis is [height, width]
             basis = fourier.spectrum_to_basis(spectrum, l2_normalize=True) * eps
 
@@ -166,7 +165,7 @@ def eval_fourier_heatmap(
             # show result to pbar
             results = OrderedDict()
             for k, v in error_matrix_dict.items():
-                results[f"err{k}"] = v[i]
+                results[f"err{k}"] = v[i].item()
             pbar.set_postfix(results)
             pbar.update()
 
