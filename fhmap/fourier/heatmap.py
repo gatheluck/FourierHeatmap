@@ -11,10 +11,9 @@ import torchvision
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from fhmap.fourier.noise import AddFourierNoise
-
 import fhmap
 import fhmap.fourier as fourier
+from fhmap.fourier.noise import AddFourierNoise
 
 
 def create_fourier_heatmap_from_error_matrix(
@@ -130,7 +129,9 @@ def eval_fourier_heatmap(
     fhmap_width: Final[int] = width - ignore_edge_size
 
     if not isinstance(dataset.transform, torchvision.transforms.Compose):
-        raise ValueError(f"type of dataset.transform should be torchvision.transforms.Compose, not {type(dataset.transform)}")
+        raise ValueError(
+            f"type of dataset.transform should be torchvision.transforms.Compose, not {type(dataset.transform)}"
+        )
     original_transforms: Final = dataset.transform.transforms
 
     error_matrix_dict = {
@@ -138,7 +139,9 @@ def eval_fourier_heatmap(
     }
 
     spectrums = fourier.get_spectrum(height, width, ignore_edge_size, ignore_edge_size)
-    with tqdm(spectrums, ncols=160, total=fhmap_height * fhmap_width) as pbar:  # without total progress par might not be shown.
+    with tqdm(
+        spectrums, ncols=160, total=fhmap_height * fhmap_width
+    ) as pbar:  # without total progress par might not be shown.
         for i, spectrum in enumerate(pbar):  # Size of basis is [height, width]
             basis = fourier.spectrum_to_basis(spectrum, l2_normalize=True) * eps
 
@@ -178,8 +181,6 @@ def eval_fourier_heatmap(
 
     if savedir:
         for k, fourier_heatmap in zip(topk, fourier_heatmaps):
-            save_fourier_heatmap(
-                fourier_heatmap / 100.0, savedir, f"_top{k}"
-            )
+            save_fourier_heatmap(fourier_heatmap / 100.0, savedir, f"_top{k}")
 
     return fourier_heatmaps

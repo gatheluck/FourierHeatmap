@@ -109,7 +109,7 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
         cfg.batch_size,
         cast(torch.device, device),  # needed for passing mypy check.
         cfg.topk,
-        pathlib.Path(".")
+        pathlib.Path("."),
     )
 
 
