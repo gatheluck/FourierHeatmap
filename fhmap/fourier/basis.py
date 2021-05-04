@@ -9,7 +9,7 @@ def get_spectrum(
     width: int,
     height_ignore_edge_size: int = 0,
     width_ignore_edge_size: int = 0,
-    low_center: bool = False,
+    low_center: bool = True,
 ) -> Iterator[torch.Tensor]:
     """Return generator of specrum matrics of 2D Fourier basis.
 
