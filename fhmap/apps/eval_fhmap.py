@@ -9,7 +9,7 @@ from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import MISSING, OmegaConf
 
-import fhmap.fourier.heatmap as heatmap
+import fhmap
 import fhmap.schema as schema
 
 logger = logging.getLogger(__name__)
@@ -90,6 +90,7 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     root: Final[pathlib.Path] = cwd / "data"
     datamodule = instantiate(cfg.dataset, cfg.batch_size, cfg.env.num_workers, root)
     datamodule.prepare_data()
+    datamodule.setup()
     logger.info("datamodule setup: done.")
 
     # Setup model
@@ -99,21 +100,17 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     arch.eval()
     logger.info("architecture setup: done.")
 
-    fhmaps = heatmap.eval_fourier_heatmap(
+    fhmap.eval_fourier_heatmap(
         datamodule.input_size,
         cfg.ignore_edge_size,
         cfg.eps,
         arch,
-        datamodule,
-        cfg.num_samples,
+        datamodule.test_dataset,
+        cfg.batch_size,
         cast(torch.device, device),  # needed for passing mypy check.
         cfg.topk,
+        pathlib.Path("."),
     )
-
-    for k, fourier_heatmap in zip(cfg.topk, fhmaps):
-        heatmap.save_fourier_heatmap(
-            fourier_heatmap / 100.0, pathlib.Path("."), f"_top{k}"
-        )
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ version = "0.2.0"
 description = "Unofficial pytorch implementation of Fourier Heat Map proposed in 'A Fourier Perspective on Model Robustness in Computer Vision' [Yin+, NeurIPS2019]"
 authors = ["gatheluck <gatheluck+tech@gmail.com>"]
 license = "MIT"
+repository = "https://github.com/gatheluck/FourierHeatmap"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"

@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
+from .fourier.heatmap import eval_fourier_heatmap  # noqa
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
