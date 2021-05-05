@@ -8,7 +8,7 @@ repository = "https://github.com/gatheluck/FourierHeatmap"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 torch = "^1.8.1"
 torchvision = "^0.9.1"
 pandas = "^1.2.3"
