@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: provision/docker/Dockerfile
       shm_size: 30G
-    command: arch=${ARCH} batch_size=${BATCH_SIZE} dataset=${DATASET} eps=${EPS} ignore_edge_size=${IGNORE_EDGE_SIZE} num_samples=${NUM_SAMPLES} weightpath=${INSTALL_DIRECTORY}/FourierHeatmap/weight/${WEIGHTFILE}
+    command: arch=${ARCH} batch_size=${BATCH_SIZE} dataset=${DATASET} eps=${EPS} ignore_edge_size=${IGNORE_EDGE_SIZE} num_samples=${NUM_SAMPLES} env.device=${DEVICE} weightpath=${INSTALL_DIRECTORY}/FourierHeatmap/weight/${WEIGHTFILE}
     ports:
       - 9000:8000
     # Following is needed for use GPU in the container

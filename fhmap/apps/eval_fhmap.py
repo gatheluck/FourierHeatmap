@@ -82,7 +82,7 @@ def eval_fhmap(cfg: EvalFhmapConfig) -> None:
     # device: The device which is used in culculation.
     # cwd: The original current working directory. hydra automatically changes it.
     # weightpath: The path of target trained weight.
-    device: Final = "cuda" if cfg.env.gpus > 0 else "cpu"
+    device: Final = cfg.env.device
     cwd: Final[pathlib.Path] = pathlib.Path(hydra.utils.get_original_cwd())
     weightpath: Final[pathlib.Path] = pathlib.Path(cfg.weightpath)
 
